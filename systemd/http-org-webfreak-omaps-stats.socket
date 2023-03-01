@@ -1,0 +1,10 @@
+[Unit]
+Description = omaps cdn statistics HTTP server
+
+[Socket]
+ListenStream = 2142
+Accept = yes
+
+[Install]
+WantedBy = sockets.target
+

@@ -1,0 +1,56 @@
+[Unit]
+Description=OMaps download statistics aggregator script
+
+[Service]
+User=caddy
+Group=caddy
+
+ExecStart=/srv/http/org.webfreak.omaps/stats
+WorkingDirectory=/srv/http/org.webfreak.omaps
+StandardInput=socket
+
+InaccessiblePaths=/opt/ /etc/opt/ /boot/ /mnt/ /media/
+ProtectSystem=strict
+ProtectHome=true
+TemporaryFileSystem=/var:ro
+BindPaths=/srv/http/org.webfreak.omaps /data/logs/http
+
+# Device resrictions
+PrivateDevices=true
+DevicePolicy=closed
+#DeviceAllow=/dev/sda r
+
+# Security/permissions
+NoNewPrivileges=true
+CapabilityBoundingSet=
+#CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+#AmbientCapabilities=CAP_NET_BIND_SERVICE
+# Note: PrivateUsers prevents bind on privileged ports!
+PrivateUsers=true
+
+# System call filter
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+LockPersonality=true
+RestrictNamespaces=true
+RestrictRealtime=true
+#RestrictSUIDSGID=true
+
+# Various restrictions (mix of filesystem access and system call restrictions)
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+#ProtectKernelLogs=true
+#ProtectClock=true
+#ProtectHostname=true
+#ProtectProc=invisible
+
+# Enforce W^X
+# Note: Add /tmp/ if not mounted noexec!
+InaccessiblePaths=/dev/shm/ /dev/mqueue/ /dev/pts/ /dev/hugepages/
+MemoryDenyWriteExecute=true
+SystemCallFilter=~memfd_create
+
+# Cleanup leftover IPC objects
+RemoveIPC=true
+

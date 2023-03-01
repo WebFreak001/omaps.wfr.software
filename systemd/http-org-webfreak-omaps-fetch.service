@@ -1,0 +1,10 @@
+[Unit]
+Description=Fetch OrganicMaps mirror
+
+[Service]
+User=http
+Group=http
+WorkingDirectory=/srv/http/org.webfreak.omaps
+ExecStart=/srv/http/org.webfreak.omaps/sync.sh
+
+

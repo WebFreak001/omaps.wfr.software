@@ -1,0 +1,11 @@
+[Unit]
+Description="Periodic timer to fetch OMaps mirror"
+
+[Timer]
+OnBootSec=8min
+OnUnitActiveSec=8h
+Unit=http-org-webfreak-omaps-fetch.service
+
+[Install]
+WantedBy=multi-user.target
+
