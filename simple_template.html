@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html><head>
+<title>Listing of {{html .Name}}</title>
+<meta charset="utf-8">
+<style>
+table th { text-align: left; cursor: pointer; }
+table th.sorted:before { display: inline; content: "\25BC   "; }
+table th.inverted:before { display: inline; content: "\25B2   "; }
+</style>
+<script>
+window.onload = function() {
+	var headers = document.querySelectorAll("table thead th");
+	var rows = document.querySelectorAll("table tbody tr");
+	function unsortExcept(except) { for (var i = 0; i < headers.length; i++) if (i != except) headers[i].classList.remove("sorted", "inverted"); }
+	function getSortData(d) { var t = d.getAttribute("title"), c = d.textContent; return t ? parseInt(t) : /\/$/.test(c) ? ("_" + c) : c; }
+	function cmp(a, b) { return typeof a == "string" ? a.localeCompare(b) : a - b; }
+	function sortData(column, inverted) {
+		var sorted = Array.prototype.slice.call(rows);
+		sorted.sort(function (a, b) { return cmp(getSortData(a.children[column]), getSortData(b.children[column])) * (inverted ? -1 : 1); });
+		var b = sorted[0].parentElement;
+		b.appendChild(sorted[sorted.length - 1]);
+		for (var i = sorted.length - 2; i >= 0; i--) {
+			b.insertBefore(sorted[i], sorted[i + 1]);
+		}
+	}
+	for (var i = 0; i < headers.length; i++) {
+		headers[i].onclick = function(i) {
+			unsortExcept(i);
+			this.classList.add("sorted");
+			sortData(i, this.classList.toggle("inverted"));
+		}.bind(headers[i], i);
+	}
+};
+</script>
+</head><body>
+<h1>Listing of {{html .Name}}</h1>
+<table style="width: 100%">
+<thead>
+<tr><th class="sorted">Filename</th><th>Size</th><th>Last Modified</th></tr>
+{{- if .CanGoUp}}
+<tr><td><a href="..">../</a></td>       <td>-</td>      <td>-</td></tr>
+{{- end}}
+</thead><tbody>
+{{- range .Items}}
+<tr><td><a href="{{html .URL}}">{{html .Name}}</a></td>        <td title="{{.Size}} B">{{- if .IsDir}}-{{- else}}{{.HumanSize}}{{- end}}</td>  <td>{{.HumanModTime "2006-01-02 15:04"}}</td></tr>
+{{- end}}
+<tbody></table>
+</body></html>

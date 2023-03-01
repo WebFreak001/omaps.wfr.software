@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WebFreak's Organic Maps mirror</title>
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+html {
+        font-family: sans-serif;
+}
+@media screen {
+        html {
+                background-color: #ddd;
+        }
+        body {
+                background-color: white;
+                max-width: 18cm;
+                padding: 2cm;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.25);
+        }
+}
+@media screen and (min-width: 18cm) { body { margin: 8px auto; } }
+
+.focus { text-align: center; margin: 3rem 0; font-size: 150%; }
+dt, .focus { font-weight: bold; }
+dd { margin-bottom: 1em; }
+table { margin-bottom: 3em; }
+th { text-align: right; }
+
+.bars {
+	display: flex;
+	width: 100%;
+	height: 150px;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin-bottom: 2rem;
+}
+
+.bars .bar {
+	flex-grow: 1;
+	flex-shrink: 1;
+	border: 2px solid black;
+	box-sizing: border-box;
+	text-align: center;
+	line-height: 2;
+	color: black;
+	background-color: white;
+	text-shadow: 0 2px 0 white, 2px 2px 0 white, 2px 0 0 white, 0 -2px 0 white, -2px -2px 0 white, -2px 0 0 white, -2px 2px 0 white, 2px -2px 0 white;
+	width: 4ch;
+}
+
+@media screen and (max-width: 500px) {
+	.bars .bar { font-size: 3vw; }
+}
+</style>
+</head>
+<body>
+	<h1>Organic Maps mirror by WFR Software</h1>
+	<p>
+		Freely available mirror for all CDN data files for <a href="https://organicmaps.app/">Organic Maps</a>.
+	</p>
+	<p class="focus">
+		<a href="maps/">View Files</a>
+	</p>
+	<p>
+		Maximum bandwidth of this server to you is around 850 Mbit/s.
+	</p>
+	<div id="stats"></div>
+	<hr/>
+	<p>
+		This is a free service provided by WFR Software UG (haftungsbeschränkt) <a href="https://wfr.software">[imprint]</a>
+	</p>
+<script>
+function bandwidth(bytes, seconds)
+{
+	if (bytes == 0) return "0 Mbit/s";
+	else if (seconds == 0) return "instant";
+	else return (bytes / 1000 / 1000 * 8 / seconds).toFixed(1) + " Mbit/s";
+}
+
+function siBytes(bytes) {
+	var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	if (bytes == 0) return '0 Byte';
+	var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+	return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+}
+
+fetch("/stats.json")
+	.then(a => a.json())
+	.then(json => {
+		var stats = document.querySelector("#stats");
+		var intro = document.createElement("p");
+		intro.textContent = "Download statistics for past " + json.hist[0].length + " days";
+		stats.appendChild(intro);
+		var bars = document.createElement("div");
+		bars.className = "bars";
+		var max = 0;
+		for (var i = 0; i < json.hist[0].length; i++) max = Math.max(max, json.hist[0][i]);
+		for (var i = json.hist[0].length - 1; i >= 0; i--) {
+			var bar = document.createElement("div");
+			bar.className = "bar";
+			bar.title = "Downloads: " + json.hist[0][i] + "\nAvg. Bandwidth: " + bandwidth(json.hist[1][i], json.hist[2][i]);
+			bar.style.height = (json.hist[0][i] / max * 100) + "%";
+			if (json.hist[0][i])
+				bar.textContent = json.hist[0][i];
+			bars.appendChild(bar);
+		}
+		stats.appendChild(bars);
+		var summary = document.createElement("pre");
+		summary.textContent = "Serving maps since " + new Date(json.start).toLocaleString() + " (browser time)\n"
+			+ "Avg. bandwidth to users: " + bandwidth(json.bytes, json.secs) + "\n"
+			+ "Total completed file downloads: " + json.dls + "\n"
+			+ "Total completed bytes: " + siBytes(json.bytes);
+		stats.appendChild(summary);
+	})
+</script>
+</body>
+</html>

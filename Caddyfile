@@ -1,0 +1,32 @@
+(omaps.webfreak.org) {
+        root * /srv/http/org.webfreak.omaps/public
+        file_server {
+                index index_override.html
+                browse /srv/http/org.webfreak.omaps/simple_template.html
+        }
+
+        log {
+                output file /data/logs/http/org.webfreak.omaps.access.log {
+                        roll_keep_for 7d
+                }
+                format json
+        }
+
+        reverse_proxy /stats.json [::1]:2142
+}
+
+#(omaps.webfreak.org) {
+#       respond "temporary server maintenance (until 20:10 CET)" 500 {
+#               close
+#       }
+#}
+
+omaps.wfr.software {
+        tls /etc/letsencrypt/live/wfr.software/fullchain.pem /etc/letsencrypt/live/wfr.software/privkey.pem
+        import omaps.webfreak.org
+}
+
+omaps.wfr.software:80 {
+        import omaps.webfreak.org
+}
+
